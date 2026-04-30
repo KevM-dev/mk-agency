@@ -78,7 +78,7 @@
       e.preventDefault();
 
       if (form.action.includes('YOUR_FORM_ID')) {
-        formStatus.textContent = 'Contact form not yet configured. Please email mushengezikevin@gmail.com directly.';
+        formStatus.textContent = 'Contact form not yet configured. Please email Kevinjrm@yahoo.com directly.';
         formStatus.className = 'form-note error';
         return;
       }
@@ -104,7 +104,7 @@
           throw new Error('Server error');
         }
       } catch {
-        formStatus.textContent = 'Something went wrong. Please email mushengezikevin@gmail.com directly.';
+        formStatus.textContent = 'Something went wrong. Please email Kevinjrm@yahoo.com directly.';
         formStatus.className = 'form-note error';
       } finally {
         submitBtn.disabled = false;

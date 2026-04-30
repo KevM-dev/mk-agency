@@ -1,4 +1,4 @@
-/* MK-Agency — Interactive behaviour */
+/* Kevin & Co. Agency — Interactive behaviour */
 
 (function () {
   'use strict';

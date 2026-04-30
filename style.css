@@ -496,6 +496,7 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  transform: translateZ(0);
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 
@@ -508,6 +509,7 @@ button {
 .project-preview {
   background: var(--surface2);
   border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .browser-chrome {

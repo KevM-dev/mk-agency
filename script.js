@@ -13,11 +13,26 @@
     navbar.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
 
+  function lockScroll() {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+  }
+
+  function unlockScroll() {
+    const scrollY = parseInt(document.body.style.top || '0', 10) * -1;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
+  }
+
   hamburger.addEventListener('click', () => {
     const isOpen = hamburger.classList.toggle('open');
     navLinks.classList.toggle('open', isOpen);
     hamburger.setAttribute('aria-expanded', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    isOpen ? lockScroll() : unlockScroll();
   });
 
   navLinks.addEventListener('click', (e) => {
@@ -25,7 +40,7 @@
       hamburger.classList.remove('open');
       navLinks.classList.remove('open');
       hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
+      unlockScroll();
     }
   });
 

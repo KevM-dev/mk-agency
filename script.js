@@ -8,6 +8,7 @@
   const navbar = document.getElementById('navbar');
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
+  const navBackdrop = document.getElementById('navBackdrop');
 
   window.addEventListener('scroll', () => {
     navbar.classList.toggle('scrolled', window.scrollY > 20);
@@ -28,21 +29,27 @@
     window.scrollTo(0, scrollY);
   }
 
+  function closeMenu() {
+    hamburger.classList.remove('open');
+    navLinks.classList.remove('open');
+    navBackdrop.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    unlockScroll();
+  }
+
   hamburger.addEventListener('click', () => {
     const isOpen = hamburger.classList.toggle('open');
     navLinks.classList.toggle('open', isOpen);
+    navBackdrop.classList.toggle('open', isOpen);
     hamburger.setAttribute('aria-expanded', isOpen);
     isOpen ? lockScroll() : unlockScroll();
   });
 
   navLinks.addEventListener('click', (e) => {
-    if (e.target.matches('a')) {
-      hamburger.classList.remove('open');
-      navLinks.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      unlockScroll();
-    }
+    if (e.target.matches('a')) closeMenu();
   });
+
+  navBackdrop.addEventListener('click', closeMenu);
 
   // ===== SCROLL REVEAL =====
 

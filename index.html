@@ -35,7 +35,9 @@
   <!-- ===== HERO ===== -->
   <section class="hero" id="home">
     <div class="hero-glow"></div>
+    <div class="hero-grid-bg" aria-hidden="true"></div>
     <div class="container hero-inner">
+
       <div class="hero-content">
         <span class="badge">Web Design Agency</span>
         <h1>Websites That<br><span class="gradient-text">Win Clients</span></h1>
@@ -44,21 +46,44 @@
           <a href="#work" class="btn-primary btn-lg">See Our Work</a>
           <a href="#contact" class="btn-outline btn-lg">Get a Free Quote</a>
         </div>
+        <div class="hero-stats-inline">
+          <div class="stat-inline">
+            <span class="stat-inline-num">2 Wks</span>
+            <span class="stat-inline-label">Avg. Delivery</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat-inline">
+            <span class="stat-inline-num">100%</span>
+            <span class="stat-inline-label">Client Satisfaction</span>
+          </div>
+          <div class="stat-divider" aria-hidden="true"></div>
+          <div class="stat-inline">
+            <span class="stat-inline-num">Free</span>
+            <span class="stat-inline-label">Consultation</span>
+          </div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div class="stat-card">
-          <span class="stat-number">3+</span>
-          <span class="stat-label">Sites Launched</span>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-browser">
+          <div class="browser-chrome">
+            <div class="browser-dots">
+              <span class="dot red"></span>
+              <span class="dot amber"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="browser-url">kevm-dev.github.io/tiago-physio</div>
+          </div>
+          <div class="project-iframe-wrap">
+            <iframe src="https://kevm-dev.github.io/tiago-physio/" loading="lazy" title="Portfolio preview" tabindex="-1"></iframe>
+          </div>
         </div>
-        <div class="stat-card">
-          <span class="stat-number">2 wks</span>
-          <span class="stat-label">Avg. Delivery</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-number">100%</span>
-          <span class="stat-label">Satisfaction</span>
+        <div class="hero-float-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Site delivered — 9 days
         </div>
       </div>
+
     </div>
     <div class="scroll-hint">
       <div class="scroll-dot"></div>
@@ -155,8 +180,64 @@
     </div>
   </section>
 
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="section section-alt" id="testimonials">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Client Reviews</span>
+        <h2>What Our Clients Say</h2>
+        <p class="section-sub">Real feedback from businesses we've built for.</p>
+      </div>
+      <div class="testimonials-grid">
+
+        <div class="testimonial-card reveal">
+          <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+          <blockquote>
+            <p>"Kevin delivered exactly what we asked for — a professional site that showcases our work properly. We started getting enquiries through the website within the first few weeks of going live."</p>
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">RK</div>
+            <div>
+              <strong>Ryan K.</strong>
+              <span>Director, RK Tile &amp; Stone</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal">
+          <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+          <blockquote>
+            <p>"The online booking form alone has saved me hours of admin every week. Kevin was fast, responsive, and clearly knows what he's doing. Looks great on mobile too."</p>
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">TM</div>
+            <div>
+              <strong>Tiago M.</strong>
+              <span>Physiotherapist, Tiago Physio</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card reveal">
+          <div class="testimonial-stars" aria-label="5 stars">★★★★★</div>
+          <blockquote>
+            <p>"Working with Kevin was refreshingly straightforward. Clear pricing, fast turnaround, and a site I'm genuinely proud to show people. Would recommend without hesitation."</p>
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">AS</div>
+            <div>
+              <strong>Alex S.</strong>
+              <span>Local Business Owner</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- ===== SERVICES ===== -->
-  <section class="section section-alt" id="services">
+  <section class="section" id="services">
     <div class="container">
       <div class="section-header">
         <span class="section-tag">What We Do</span>
@@ -229,7 +310,7 @@
   </section>
 
   <!-- ===== PROCESS ===== -->
-  <section class="section" id="process">
+  <section class="section section-alt" id="process">
     <div class="container">
       <div class="section-header">
         <span class="section-tag">How It Works</span>
@@ -237,35 +318,55 @@
         <p class="section-sub">From first contact to live site — here's how we work together.</p>
       </div>
       <div class="process-steps">
+
         <div class="process-step reveal">
-          <div class="step-number">01</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="step-num">01</div>
           <h3>Discuss</h3>
           <p>Free call to understand your business, your goals, and what kind of site you need.</p>
         </div>
+
         <div class="process-connector" aria-hidden="true"></div>
+
         <div class="process-step reveal">
-          <div class="step-number">02</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <div class="step-num">02</div>
           <h3>Design</h3>
           <p>A first mockup delivered within 3 days for your feedback and approval.</p>
         </div>
+
         <div class="process-connector" aria-hidden="true"></div>
+
         <div class="process-step reveal">
-          <div class="step-number">03</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="step-num">03</div>
           <h3>Build</h3>
           <p>Full site developed, tested across all devices, and polished to your satisfaction.</p>
         </div>
+
         <div class="process-connector" aria-hidden="true"></div>
+
         <div class="process-step reveal">
-          <div class="step-number">04</div>
+          <div class="step-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="step-num">04</div>
           <h3>Launch</h3>
           <p>Go live with your new site. I handle the deployment and give you everything you need.</p>
         </div>
+
       </div>
     </div>
   </section>
 
   <!-- ===== PRICING ===== -->
-  <section class="section section-alt" id="pricing">
+  <section class="section" id="pricing">
     <div class="container">
       <div class="section-header">
         <span class="section-tag">Transparent Pricing</span>
@@ -420,7 +521,7 @@
   </section>
 
   <!-- ===== CONTACT ===== -->
-  <section class="section" id="contact">
+  <section class="section section-alt" id="contact">
     <div class="container">
       <div class="contact-grid">
         <div class="contact-info reveal">
@@ -440,7 +541,6 @@
         </div>
 
         <form class="contact-form reveal" action="https://formspree.io/f/xojrapzb" method="POST" id="contactForm">
-          <!-- TODO: Replace YOUR_FORM_ID with your Formspree form ID from formspree.io -->
           <div class="form-row">
             <div class="form-group">
               <label for="name">Your Name <span aria-hidden="true">*</span></label>
@@ -473,6 +573,20 @@
           <p class="form-note" id="formStatus"></p>
         </form>
 
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FINAL CTA ===== -->
+  <section class="cta-section">
+    <div class="cta-glow" aria-hidden="true"></div>
+    <div class="container cta-inner">
+      <span class="section-tag">Let's Work Together</span>
+      <h2>Ready to Get Your<br><span class="gradient-text">Business Online?</span></h2>
+      <p>Free consultation. No commitment. Your site live in 2 weeks.</p>
+      <div class="cta-buttons">
+        <a href="#contact" class="btn-primary btn-lg">Get a Free Quote</a>
+        <a href="#work" class="btn-outline btn-lg">See Our Work</a>
       </div>
     </div>
   </section>

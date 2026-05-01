@@ -11,6 +11,31 @@
     navbar.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
 
+  // ===== FLOATING CTA: show after hero, hide on contact =====
+
+  const floatingCta = document.getElementById('floatingCta');
+  const heroEl = document.querySelector('.hero');
+  const contactEl = document.getElementById('contact');
+
+  if (floatingCta && heroEl && contactEl) {
+    let heroVisible = true;
+    let contactVisible = false;
+
+    const updateFloatingCta = () => {
+      floatingCta.classList.toggle('visible', !heroVisible && !contactVisible);
+    };
+
+    new IntersectionObserver((entries) => {
+      heroVisible = entries[0].isIntersecting;
+      updateFloatingCta();
+    }, { threshold: 0, rootMargin: '-80px 0px 0px 0px' }).observe(heroEl);
+
+    new IntersectionObserver((entries) => {
+      contactVisible = entries[0].isIntersecting;
+      updateFloatingCta();
+    }, { threshold: 0.2 }).observe(contactEl);
+  }
+
   // ===== SCROLL REVEAL =====
 
   const revealElements = document.querySelectorAll('.reveal');

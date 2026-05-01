@@ -1361,6 +1361,51 @@ button {
     flex-wrap: wrap;
     justify-content: center;
   }
+
+  .floating-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    bottom: 20px;
+    right: 16px;
+    z-index: 900;
+    background: var(--accent);
+    color: #fff;
+    padding: 13px 20px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: 0.2px;
+    box-shadow: 0 6px 20px rgba(79, 142, 247, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+    opacity: 0;
+    transform: translateY(80px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .floating-cta.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .floating-cta:active {
+    background: var(--accent-hover);
+    transform: translateY(0) scale(0.96);
+  }
+
+  .floating-cta svg {
+    flex-shrink: 0;
+  }
+}
+
+.floating-cta {
+  display: none;
 }
 
 @media (max-width: 540px) {

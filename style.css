@@ -447,43 +447,6 @@ button {
   white-space: nowrap;
 }
 
-/* ===== SCROLL HINT ===== */
-
-.scroll-hint {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-}
-
-.scroll-dot {
-  width: 24px;
-  height: 40px;
-  border: 2px solid var(--border);
-  border-radius: 99px;
-  position: relative;
-}
-
-.scroll-dot::after {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 99px;
-  animation: scrollPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes scrollPulse {
-  0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  50% { opacity: 0; transform: translateX(-50%) translateY(12px); }
-}
-
 /* ===== PORTFOLIO / WORK ===== */
 
 .work-grid {
@@ -849,6 +812,10 @@ button {
   background: var(--surface2);
 }
 
+.pricing-recommended {
+  border-color: rgba(79, 142, 247, 0.45);
+}
+
 .pricing-badge {
   position: absolute;
   top: -14px;
@@ -862,6 +829,23 @@ button {
   text-transform: uppercase;
   border-radius: 99px;
   padding: 5px 16px;
+  white-space: nowrap;
+}
+
+.pricing-badge-soft {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface2);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid rgba(79, 142, 247, 0.45);
+  border-radius: 99px;
+  padding: 4px 14px;
   white-space: nowrap;
 }
 
@@ -1120,6 +1104,18 @@ button {
   color: var(--muted);
   font-size: 0.98rem;
   line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.contact-info > p.contact-lede {
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.contact-info > p.contact-lede + p {
   margin-bottom: 32px;
 }
 
@@ -1238,59 +1234,6 @@ button {
 
 .form-note.error {
   color: var(--error);
-}
-
-/* ===== FINAL CTA ===== */
-
-.cta-section {
-  padding: 120px 0;
-  background: var(--bg);
-  position: relative;
-  overflow: hidden;
-  text-align: center;
-}
-
-.cta-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 900px;
-  height: 500px;
-  background: radial-gradient(ellipse at center, rgba(79, 142, 247, 0.11) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.cta-inner {
-  position: relative;
-  z-index: 1;
-}
-
-.cta-inner .section-tag {
-  display: block;
-  margin-bottom: 16px;
-}
-
-.cta-inner h2 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  margin-bottom: 20px;
-}
-
-.cta-inner > p {
-  font-size: 1.1rem;
-  color: var(--muted);
-  margin-bottom: 40px;
-}
-
-.cta-buttons {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 /* ===== FOOTER ===== */
@@ -1508,9 +1451,5 @@ button {
 
   .contact-form {
     padding: 24px;
-  }
-
-  .cta-section {
-    padding: 80px 0;
   }
 }

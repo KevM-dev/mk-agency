@@ -3,53 +3,13 @@
 (function () {
   'use strict';
 
-  // ===== NAVBAR: scroll effect + hamburger =====
+  // ===== NAVBAR: scroll effect =====
 
   const navbar = document.getElementById('navbar');
-  const hamburger = document.getElementById('hamburger');
-  const navLinks = document.getElementById('navLinks');
-
-  let menuLocked = false;
 
   window.addEventListener('scroll', () => {
-    if (menuLocked) return;
     navbar.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
-
-  function lockScroll() {
-    const scrollY = window.scrollY;
-    menuLocked = true;
-    navbar.classList.add('scrolled');
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-  }
-
-  function unlockScroll() {
-    const scrollY = parseInt(document.body.style.top || '0', 10) * -1;
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, scrollY);
-    menuLocked = false;
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  }
-
-  hamburger.addEventListener('click', () => {
-    const isOpen = hamburger.classList.toggle('open');
-    navLinks.classList.toggle('open', isOpen);
-    hamburger.setAttribute('aria-expanded', isOpen);
-    isOpen ? lockScroll() : unlockScroll();
-  });
-
-  navLinks.addEventListener('click', (e) => {
-    if (e.target.matches('a')) {
-      hamburger.classList.remove('open');
-      navLinks.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      unlockScroll();
-    }
-  });
 
   // ===== SCROLL REVEAL =====
 

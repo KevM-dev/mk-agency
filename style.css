@@ -23,8 +23,8 @@
   --font-body: 'Inter', system-ui, sans-serif;
   --font-heading: 'Poppins', system-ui, sans-serif;
 
-  --max-w: 1140px;
-  --nav-h: 68px;
+  --max-w: 1320px;
+  --nav-h: 72px;
 
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
@@ -48,7 +48,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   line-height: 1.7;
-  font-size: 16px;
+  font-size: clamp(16px, 0.6rem + 0.6vw, 19px);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -76,11 +76,11 @@ button {
 .container {
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
 }
 
 .section {
-  padding: 100px 0;
+  padding: 120px 0;
 }
 
 .section-alt {

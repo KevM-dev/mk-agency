@@ -262,9 +262,16 @@ button {
   gap: 5px;
   background: none;
   border: none;
-  padding: 4px;
-  margin-left: auto;
+  padding: 10px;
+  margin: -10px -10px -10px auto;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease;
+}
+
+.hamburger:active {
+  opacity: 0.6;
 }
 
 .hamburger span {
@@ -273,7 +280,7 @@ button {
   height: 2px;
   background: var(--text);
   border-radius: 2px;
-  transition: transform 0.3s, opacity 0.3s;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
 }
 
 .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -1366,7 +1373,7 @@ button {
   }
 
   .nav-links {
-    display: none;
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -1384,10 +1391,16 @@ button {
     z-index: 999;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
   }
 
   .nav-links.open {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 
   .nav-link {

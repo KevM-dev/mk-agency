@@ -1355,6 +1355,22 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .addon-divider::before,
+  .addon-divider::after {
+    display: none;
+  }
+
+  .addon-divider {
+    justify-content: center;
+  }
+
+  .addon-divider span {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.5;
+    max-width: 100%;
+  }
+
   .nav-links {
     display: none;
   }

@@ -41,6 +41,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--nav-h);
+  overflow-x: hidden;
 }
 
 body {
@@ -50,6 +51,8 @@ body {
   line-height: 1.7;
   font-size: clamp(16px, 0.6rem + 0.6vw, 19px);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 img, iframe {
@@ -1337,8 +1340,19 @@ button {
 }
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+
   .section {
     padding: 72px 0;
+  }
+
+  .work-grid,
+  .services-grid,
+  .testimonials-grid,
+  .pricing-grid {
+    grid-template-columns: 1fr;
   }
 
   .nav-links {

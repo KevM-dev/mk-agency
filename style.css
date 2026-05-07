@@ -502,9 +502,9 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  width: 400%;
-  height: 400%;
-  transform: scale(0.25);
+  width: 250%;
+  height: 250%;
+  transform: scale(0.4);
   transform-origin: top left;
   pointer-events: none;
   border: none;

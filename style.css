@@ -493,7 +493,7 @@ button {
 .project-iframe-wrap {
   position: relative;
   width: 100%;
-  padding-top: 85%;
+  padding-top: 50%;
   overflow: hidden;
   background: #fff;
 }

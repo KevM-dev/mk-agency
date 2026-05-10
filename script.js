@@ -1,4 +1,4 @@
-/* Kevin & Co. Agency — Interactive behaviour */
+/* Kevin Labs — Interactive behaviour */
 
 (function () {
   'use strict';
@@ -73,6 +73,17 @@
 
   sections.forEach(s => sectionObserver.observe(s));
 
+  // ===== WHATSAPP LINK (number kept out of HTML) =====
+
+  const whatsappLink = document.getElementById('whatsappLink');
+  if (whatsappLink) {
+    whatsappLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const n = atob('NDQ3NTE5NjQwNTY4');
+      window.open('https://wa.me/' + n, '_blank', 'noopener,noreferrer');
+    });
+  }
+
   // ===== CONTACT FORM via Formspree =====
 
   const form = document.getElementById('contactForm');
@@ -85,7 +96,7 @@
       e.preventDefault();
 
       if (form.action.includes('YOUR_FORM_ID')) {
-        formStatus.textContent = 'Contact form not yet configured. Please email Kevinjrm@yahoo.com directly.';
+        formStatus.textContent = 'Contact form not yet configured. Please email Kevin@kevwebdesign.com directly.';
         formStatus.className = 'form-note error';
         return;
       }
@@ -104,14 +115,14 @@
         });
 
         if (res.ok) {
-          formStatus.textContent = "Message sent! I'll be in touch within 24 hours.";
+          formStatus.textContent = "Brief received. Kevin Labs will respond within 24 hours with a formal scope assessment.";
           formStatus.className = 'form-note success';
           form.reset();
         } else {
           throw new Error('Server error');
         }
       } catch {
-        formStatus.textContent = 'Something went wrong. Please email Kevinjrm@yahoo.com directly.';
+        formStatus.textContent = 'Something went wrong. Please email Kevin@kevwebdesign.com directly.';
         formStatus.className = 'form-note error';
       } finally {
         submitBtn.disabled = false;

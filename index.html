@@ -1557,16 +1557,25 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     display: flex;
     grid-template-columns: none;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     gap: 14px;
     margin: 0 calc(-1 * var(--gutter));
     padding: 0 var(--gutter) 12px;
     scrollbar-width: none;
+    touch-action: pan-x pan-y;
   }
   .work-grid::-webkit-scrollbar { display: none; }
   .work-grid > .proj {
     flex: 0 0 84vw;
     scroll-snap-align: center;
+    /* Mobile fix: text selection on long-press eats the swipe gesture.
+       Disabling it lets horizontal pans go through cleanly on the text
+       portion of the card. The image area worked because there's no
+       selectable text — this aligns the rest of the card. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
   .proj p { -webkit-line-clamp: 3; }
   .proj .frame { aspect-ratio: 5/4; }
@@ -1576,12 +1585,14 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     display: flex;
     grid-template-columns: none;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     border-top: 0;
     gap: 12px;
     margin: 0 calc(-1 * var(--gutter));
     padding: 0 var(--gutter) 12px;
     scrollbar-width: none;
+    touch-action: pan-x pan-y;
   }
   .cap-grid::-webkit-scrollbar { display: none; }
   .cap {
@@ -1591,6 +1602,9 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     border-radius: 4px;
     background: var(--paper);
     padding: 26px 22px 28px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
   .cap::before { display: none; }
 
@@ -1623,6 +1637,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     display: flex;
     grid-template-columns: none;
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     border: 0; background: transparent;
     gap: 12px;
@@ -1630,6 +1645,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     padding: 0 var(--gutter) 12px;
     scrollbar-width: none;
     border-radius: 0;
+    touch-action: pan-x pan-y;
   }
   .price-grid::-webkit-scrollbar { display: none; }
   .price-grid .tier {
@@ -1639,6 +1655,9 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     border-radius: 4px;
     background: var(--paper);
     padding: 28px 24px 28px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
   .price-grid .tier.featured { border-color: var(--ink) !important; background: var(--ink); }
   .price-footnote { font-size: 0.84rem; line-height: 1.6; margin-top: 22px; }

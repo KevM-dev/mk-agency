@@ -1624,6 +1624,17 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     background: rgba(241, 236, 225, 0.92);
   }
 
+  /* MOBILE SCROLL — disable snap entirely. Scroll-snap fights mobile
+     inertial scrolling and forces continuous layout work. Without it,
+     the browser hands scrolling off to the GPU at 60fps. */
+  .pages {
+    scroll-snap-type: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .page {
+    scroll-snap-align: none;
+  }
+
   /* Header: swap inline nav for hamburger toggle */
   .hdr-nav { display: none; }
   .menu-toggle { display: inline-flex; }

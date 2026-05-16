@@ -954,6 +954,55 @@ h3.display { font-size: clamp(1.4rem, 2.4vw, 2rem); }
   transition: transform 0.6s var(--ease);
 }
 .proj:hover .frame img { transform: scale(1.04); }
+
+/* Permanent corner badge — signals "opens externally" without needing hover.
+   Works on mobile, doesn't undo the perf work. */
+.proj .frame::before {
+  content: "↗";
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(248, 244, 234, 0.92);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 2;
+  transition: background 0.3s, color 0.3s;
+}
+.proj:hover .frame::before {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+/* Hover-only overlay — premium "view live" reveal on desktop pointer devices.
+   Gated behind hover:hover so it never triggers on touch tap-and-stick. */
+@media (hover: hover) {
+  .proj .frame::after {
+    content: "View Live Site →";
+    position: absolute;
+    inset: 0;
+    background: rgba(196, 83, 43, 0.88);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s var(--ease);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .proj:hover .frame::after { opacity: 1; }
+}
 .proj .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .proj .tag {
   font-family: var(--mono);

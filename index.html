@@ -1641,6 +1641,15 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   }
   .page {
     scroll-snap-align: none;
+    /* Drop forced full-viewport height — without snap, 100vh-per-section
+       just inflates the document to 7× viewport height. Let content size
+       sections naturally; total scroll distance roughly halves. */
+    min-height: auto;
+    /* Defer rendering of off-screen sections. The browser skips paint and
+       layout for pages outside the viewport, drastically reducing the
+       initial render cost on a long mobile page. */
+    content-visibility: auto;
+    contain-intrinsic-size: 700px;
   }
 
   /* Header: swap inline nav for hamburger toggle */

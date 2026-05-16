@@ -408,7 +408,13 @@ body.no-scroll { overflow: hidden; }
   display: flex; flex-direction: column; align-items: flex-end;
   gap: 14px;
   transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), visibility 0.4s;
+  /* Wrapper itself must NOT intercept touches — only the interactive
+     descendants do. Otherwise the 320x300px hidden contact card eats
+     swipes/taps in the bottom-right quadrant on mobile. */
+  pointer-events: none;
 }
+.fab-wrap .fab { pointer-events: auto; }
+.fab-wrap .fab-card.open { pointer-events: auto; }
 .fab-wrap.hidden {
   opacity: 0; visibility: hidden;
   transform: translateY(24px);

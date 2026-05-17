@@ -2361,6 +2361,11 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   document.querySelectorAll('[data-goto]').forEach((el) => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
+      // Drawer links need special sequencing: drawer must close (which
+      // removes body.no-scroll) BEFORE the scroll runs, otherwise the
+      // scroll is silently no-op'd because body has overflow:hidden.
+      // The drawer-specific handler below handles those; skip here.
+      if (el.closest('.drawer')) return;
       goTo(parseInt(el.dataset.goto, 10));
     });
   });
@@ -2576,10 +2581,20 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   }
   if (menuToggle)  menuToggle.addEventListener('click', openDrawer);
   if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
-  // Any drawer link → close after navigation
+  // Drawer links handle their own nav: close the drawer (removes the
+  // body.no-scroll lock), then scroll on the next tick once body can
+  // scroll again. The global click handler above skips these.
   if (drawer) {
     drawer.querySelectorAll('[data-goto]').forEach((a) => {
-      a.addEventListener('click', () => setTimeout(closeDrawer, 60));
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const idx = parseInt(a.dataset.goto, 10);
+        closeDrawer();
+        setTimeout(() => {
+          const target = pages[idx];
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
+      });
     });
   }
   document.addEventListener('keydown', (e) => {

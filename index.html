@@ -1834,6 +1834,12 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
 @media (max-width: 820px) {
   .results-banner { aspect-ratio: 16 / 9; }
 }
+/* Infographic content (titles, captions) must remain fully visible —
+   override the default object-fit:cover with contain + breathing pad. */
+.results-banner > img {
+  object-fit: contain;
+  padding: clamp(8px, 1.6vw, 20px);
+}
 
 /* §07 — Founder card (contact section) */
 .founder-card {
@@ -1851,6 +1857,16 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   width: 88px; height: 88px;
   border-radius: 50%;
   padding: 0;
+  display: block;
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+a.founder-img:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(26, 22, 18, 0.18), 0 0 0 2px var(--accent);
+}
+a.founder-img:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 83, 43, 0.45);
 }
 .founder-card .founder-img .img-ph-mark { display: none; }
 .founder-card .founder-img .img-ph-label {
@@ -2631,9 +2647,10 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
                   studio with their finished website on screen behind them — or a
                   before/after split of a live site. Authentic, UK SMB tone, not stock.
                   Aspect 21:9 (desktop) collapses to 16:9 on mobile. -->
-      <div class="img-ph results-banner anim" style="--i:7" role="img" aria-label="Image placeholder: real UK business owner with their finished website in their workplace">
+      <div class="img-ph results-banner anim" style="--i:7" role="img" aria-label="Infographic: how a website helps a local UK shop — boost local visibility, always accessible 24/7, professional and trusted, attract more customers">
         <span class="img-ph-mark">Image</span>
         <span class="img-ph-label">Client at work · finished site live in their business</span>
+        <img src="images/results-shop-online.webp" alt="Infographic showing four ways a website helps a local UK shop: boosts local visibility through search, stays open 24/7, builds professional credibility, and attracts more customers" loading="lazy" decoding="async">
       </div>
 
       <div class="claims" style="margin-top: clamp(40px, 6vh, 64px);">
@@ -2748,12 +2765,12 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
                     looking at camera. Square crop (1:1) for the circular frame.
                     Builds trust by putting a face to 'Direct line to me'. -->
         <div class="founder-card anim" style="--i:4">
-          <div class="img-ph founder-img" role="img" aria-label="Image placeholder: portrait of Kevin">
-            <span class="img-ph-label">Portrait · Kevin</span>
-          </div>
+          <a class="img-ph founder-img" href="https://www.linkedin.com/in/kevin-mushengezi-048604242" target="_blank" rel="noopener noreferrer" aria-label="Kevin Mushengezi on LinkedIn (opens in a new tab)">
+            <img src="images/kevin-portrait.webp" alt="Kevin Mushengezi" loading="lazy" decoding="async">
+          </a>
           <div class="founder-meta">
             <span class="founder-role">Founder · Engineer</span>
-            <span class="founder-name">Kevin Mushengezi</span>
+            <a class="founder-name" href="https://www.linkedin.com/in/kevin-mushengezi-048604242" target="_blank" rel="noopener noreferrer">Kevin M.</a>
             <span class="founder-line">Every brief lands in my inbox. Every line of code is mine.</span>
           </div>
         </div>

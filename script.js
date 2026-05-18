@@ -4,12 +4,16 @@
   'use strict';
 
   // ===== NAVBAR: scroll effect =====
+  // Guarded — current build uses .chrome-top (no #navbar). Without this
+  // guard the listener would throw TypeError on every scroll, burning
+  // main-thread time during touch-inertia scroll on mobile.
 
   const navbar = document.getElementById('navbar');
-
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  }, { passive: true });
+  if (navbar) {
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+  }
 
   // ===== FLOATING CTA: show after hero, hide on contact =====
 

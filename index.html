@@ -48,7 +48,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-body { overflow: hidden; height: 100vh; }
+body { overflow-x: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
 img { display: block; max-width: 100%; }
@@ -66,6 +66,10 @@ ul, ol { list-style: none; padding: 0; }
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   transition: opacity 0.5s ease, visibility 0.5s ease;
+  /* Purely a visual mask — must never block wheel/touch input.
+     Before this, the preloader swallowed the first 1–2s of scroll
+     attempts, which felt like "the page only responds on the 3rd try". */
+  pointer-events: none;
 }
 .preloader-mark {
   display: flex; flex-direction: column; align-items: center; gap: 18px;
@@ -130,15 +134,11 @@ ul, ol { list-style: none; padding: 0; }
    PAGES + SNAP SCROLL
    ============================================================ */
 .pages {
+  /* No longer a scroll container. The whole document scrolls natively
+     on <html>/<body> on every device — eliminates the nested-scroll
+     wheel-target resolution delay and the snap-engine input-eater. */
   position: relative; z-index: 1;
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y proximity;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
 }
-.pages::-webkit-scrollbar { display: none; }
 
 .page {
   min-height: 100vh;
@@ -1698,30 +1698,12 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     background: rgba(241, 236, 225, 0.92);
   }
 
-  /* MOBILE SCROLL — convert to native body scrolling.
-     The nested scroll container (body:overflow:hidden + .pages:overflow:scroll)
-     fights mobile native inertial scrolling. Mobile browsers can't hand
-     off a nested scroll to GPU compositing cleanly. Switching to native
-     body scrolling restores 60fps. */
-  body {
-    overflow: visible;
-    height: auto;
-  }
-  .pages {
-    height: auto;
-    overflow: visible;
-    scroll-snap-type: none;
-    overscroll-behavior: auto;
-  }
+  /* MOBILE — sections size by content (no forced full-viewport per
+     section), and carousel touch zones aren't clipped at section
+     boundaries. Body/.pages scroll containers are now native on every
+     device, so no overrides needed here. */
   .page {
-    scroll-snap-align: none;
-    /* Drop forced full-viewport height — without snap, 100vh-per-section
-       just inflates the document to 7× viewport height. Let content size
-       sections naturally; total scroll distance roughly halves. */
     min-height: auto;
-    /* Mobile: drop overflow:hidden so the carousel cards' touch zones
-       are not clipped at section boundaries. Drop content-visibility
-       too — it can defer rendering of touch-target areas. */
     overflow: visible;
   }
 
@@ -1761,9 +1743,214 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   .hero-headline { font-size: clamp(2.4rem, 12vw, 4rem); }
   h2.display { font-size: clamp(2rem, 9vw, 3.2rem); }
 }
+
+/* ============================================================
+   IMAGE PLACEHOLDERS
+   Neutral premium frames awaiting real photography.
+   To use: drop a <img src="..." alt="..."> inside any .img-ph
+   and the placeholder text/mark will be hidden by the image.
+   ============================================================ */
+.img-ph {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    linear-gradient(135deg, rgba(196, 83, 43, 0.045) 0%, rgba(40, 28, 18, 0.02) 100%),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 14px,
+      rgba(40, 28, 18, 0.025) 14px,
+      rgba(40, 28, 18, 0.025) 15px
+    );
+  border: 1px dashed var(--rule-2);
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: center;
+  padding: 16px;
+  line-height: 1.6;
+}
+.img-ph .img-ph-mark {
+  position: absolute;
+  top: 12px; left: 12px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  pointer-events: none;
+}
+.img-ph .img-ph-mark::before { content: "— "; }
+.img-ph > .img-ph-label {
+  max-width: 32ch;
+  position: relative;
+  z-index: 1;
+}
+/* Any real <img> placed inside fills the frame and hides placeholder bits */
+.img-ph > img,
+.img-ph > svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.img-ph:has(> img),
+.img-ph:has(> svg) {
+  background: var(--paper);
+  border-style: solid;
+  border-color: var(--rule);
+  padding: 0;
+}
+.img-ph:has(> img) .img-ph-mark,
+.img-ph:has(> img) .img-ph-label,
+.img-ph:has(> svg) .img-ph-mark,
+.img-ph:has(> svg) .img-ph-label { display: none; }
+
+/* §03 — Capability card image */
+.cap-image {
+  aspect-ratio: 16 / 9;
+  margin-bottom: 22px;
+}
+
+/* §04 — Process editorial banner (between section head and step list) */
+.process-banner {
+  aspect-ratio: 24 / 9;
+  width: 100%;
+  margin: 0 auto clamp(40px, 6vh, 64px);
+}
+@media (max-width: 820px) {
+  .process-banner { aspect-ratio: 16 / 9; margin-bottom: 32px; }
+}
+
+/* §05 — Results banner (between bignums and claims) */
+.results-banner {
+  aspect-ratio: 21 / 9;
+  width: 100%;
+  margin-top: clamp(40px, 6vh, 64px);
+}
+@media (max-width: 820px) {
+  .results-banner { aspect-ratio: 16 / 9; }
+}
+
+/* §07 — Founder card (contact section) */
+.founder-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 18px;
+  align-items: center;
+  margin: 28px 0 32px;
+  padding: 18px 22px;
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: 6px;
+}
+.founder-card .founder-img {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  padding: 0;
+}
+.founder-card .founder-img .img-ph-mark { display: none; }
+.founder-card .founder-img .img-ph-label {
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  padding: 0 6px;
+}
+.founder-card .founder-meta {
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
+}
+.founder-card .founder-role {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.founder-card .founder-name {
+  font-family: var(--serif);
+  font-size: 1.18rem;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.founder-card .founder-line {
+  font-size: 0.88rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+@media (max-width: 520px) {
+  .founder-card { grid-template-columns: 64px 1fr; gap: 14px; padding: 14px 16px; }
+  .founder-card .founder-img { width: 64px; height: 64px; }
+  .founder-card .founder-name { font-size: 1.05rem; }
+}
 </style>
 </head>
 <body>
+
+<!--
+  ============================================================
+  IMAGE PLACEMENT SUMMARY  (added 2026-05-17)
+  ============================================================
+  All placeholders use <div class="img-ph"> with a descriptive label.
+  To replace any placeholder with a real photo, drop an <img> inside
+  the div — the placeholder text/mark hide automatically (CSS :has).
+
+  Example:
+    <div class="img-ph cap-image">
+      <img src="images/your-photo.webp" alt="Description" loading="lazy" decoding="async">
+    </div>
+
+  ------------------------------------------------------------
+  §03 — CAPABILITIES (6 placements, one per capability card)
+  ------------------------------------------------------------
+    01  Business website on laptop with contact form / CTA visible
+    02  Same site rendered on iPhone, Android tablet, and laptop
+    03  Google local-search result (Map Pack) on a phone
+    04  21-day project timeline / kanban board on a clean desk
+    05  Uptime / performance dashboard at 99.9% with green status
+    06  E-commerce checkout / Stripe payment screen on mobile
+    Layout: 16:9 image at the top of every .cap card. Cards become
+    image+text blocks (previously text-only). On mobile they become
+    full-width carousel cards — the image scales with the card.
+
+  ------------------------------------------------------------
+  §04 — PROCESS (1 placement)
+  ------------------------------------------------------------
+    Editorial wide banner placed between section head and the
+    three-step list. Workspace shot: notebook with a brief, laptop
+    showing a design preview, phone testing the live site. Aspect
+    24:9 desktop, 16:9 mobile.
+
+  ------------------------------------------------------------
+  §05 — RESULTS (1 placement)
+  ------------------------------------------------------------
+    Editorial banner between the bignums grid and the claims grid.
+    Real UK business owner with their finished site visible in
+    their workplace (shop / studio / counter). Aspect 21:9 desktop,
+    16:9 mobile. Authentic, not stock-styled.
+
+  ------------------------------------------------------------
+  §07 — CONTACT (1 placement)
+  ------------------------------------------------------------
+    Founder card inserted into the contact-info column between the
+    lede paragraph and the contact-meta links. Circular portrait
+    (1:1) of Kevin alongside name + role + one-line note.
+
+  ------------------------------------------------------------
+  Sections deliberately NOT modified
+  ------------------------------------------------------------
+    §01 Intro    — already has the Project Index aside with 3
+                   project thumbnails; hero stays uncluttered.
+    §02 Work     — already has 3 project screenshots in the work-grid.
+    §06 Pricing  — pricing cards stay text-only by design (adding
+                   images here would clutter and slow scanning).
+  ============================================================
+-->
 
 <!-- AMBIENT TEXTURE -->
 <div class="grain" aria-hidden="true"></div>
@@ -2011,34 +2198,350 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
 
       <div class="cap-grid">
         <div class="cap anim" style="--i:3">
+          <!-- IMAGE: Conversion-focused website on laptop screen with a contact form
+                     or 'Get Quote' CTA visible. A real business owner's site with
+                     clean typography. Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Diagram: web traffic flowing through a landing page and contact form into a confirmed lead">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Business website · contact form &amp; CTA on laptop</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#f8f4ea"/>
+              <rect x="16" y="16" width="448" height="238" rx="10" fill="#ebe4d4" opacity="0.55"/>
+              <text x="100" y="44" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="9" letter-spacing="2" font-weight="600" fill="#c4532b">WEB TRAFFIC</text>
+              <g>
+                <rect x="40" y="56" width="120" height="158" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.5"/>
+                <rect x="40" y="56" width="120" height="22" rx="8" fill="#1a1612" opacity="0.08"/>
+                <circle cx="51" cy="67" r="2.5" fill="#c4532b"/>
+                <rect x="60" y="65" width="36" height="4" rx="2" fill="#1a1612" opacity="0.35"/>
+                <rect x="52" y="92" width="96" height="40" rx="4" fill="#c4532b" opacity="0.12"/>
+                <rect x="60" y="100" width="60" height="5" rx="2.5" fill="#1a1612" opacity="0.55"/>
+                <rect x="60" y="112" width="76" height="3" rx="1.5" fill="#1a1612" opacity="0.30"/>
+                <rect x="60" y="119" width="48" height="3" rx="1.5" fill="#1a1612" opacity="0.30"/>
+                <rect x="52" y="148" width="56" height="14" rx="3" fill="#c4532b"/>
+                <rect x="52" y="172" width="96" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+                <rect x="52" y="180" width="80" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+                <rect x="52" y="188" width="92" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+                <text x="100" y="232" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#4d4339">Landing page</text>
+              </g>
+              <g stroke="#c4532b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M170 135 L208 135"/>
+                <path d="M201 130 L208 135 L201 140"/>
+              </g>
+              <g>
+                <rect x="220" y="74" width="120" height="122" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.5"/>
+                <rect x="232" y="86" width="40" height="4" rx="2" fill="#1a1612" opacity="0.45"/>
+                <rect x="232" y="100" width="96" height="16" rx="3" fill="#ebe4d4"/>
+                <rect x="232" y="124" width="96" height="16" rx="3" fill="#ebe4d4"/>
+                <rect x="232" y="148" width="96" height="22" rx="3" fill="#ebe4d4"/>
+                <rect x="232" y="178" width="58" height="12" rx="3" fill="#c4532b"/>
+                <text x="261" y="187" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#f8f4ea">Submit</text>
+                <text x="280" y="232" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#4d4339">Contact form</text>
+              </g>
+              <g stroke="#c4532b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M350 135 L388 135"/>
+                <path d="M381 130 L388 135 L381 140"/>
+              </g>
+              <g>
+                <circle cx="420" cy="135" r="34" fill="#4d6b40" opacity="0.14"/>
+                <circle cx="420" cy="135" r="22" fill="#4d6b40"/>
+                <path d="M410 135 L417 142 L430 128" stroke="#f8f4ea" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="420" y="194" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#1a1612">Confirmed</text>
+                <text x="420" y="208" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#4d4339">Lead</text>
+              </g>
+            </svg>
+          </div>
           <div class="n">01</div>
           <h3>A Site That Turns Visitors Into Customers</h3>
-          <p>Hand-coded for speed and clarity, so the people who land on your site actually pick up the phone or fill out the form. No bloated templates, no slow-loading pages, no confusing layouts getting in the way of an enquiry.</p>
+          <p>Hand-coded for speed and clarity, so visitors pick up the phone or fill out the form. No bloated templates getting in the way of an enquiry.</p>
         </div>
         <div class="cap anim" style="--i:4">
+          <!-- IMAGE: Same website rendered on iPhone, Android, tablet, and laptop
+                     side-by-side. Shows true cross-device consistency. Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Illustration: the same site rendered on a laptop, tablet and phone">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Same site on iPhone, tablet &amp; laptop · device line-up</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#f8f4ea"/>
+              <rect x="16" y="16" width="448" height="238" rx="10" fill="#ebe4d4" opacity="0.55"/>
+              <g transform="translate(120 60)">
+                <rect x="0" y="0" width="240" height="148" rx="6" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.22" stroke-width="1.6"/>
+                <rect x="0" y="0" width="240" height="14" rx="6" fill="#1a1612" opacity="0.08"/>
+                <rect x="0" y="8" width="240" height="6" fill="#1a1612" opacity="0.08"/>
+                <circle cx="10" cy="7" r="2" fill="#c4532b"/>
+                <rect x="14" y="32" width="212" height="62" rx="3" fill="#c4532b" opacity="0.10"/>
+                <rect x="24" y="46" width="120" height="6" rx="3" fill="#1a1612" opacity="0.55"/>
+                <rect x="24" y="58" width="160" height="3" rx="1.5" fill="#1a1612" opacity="0.30"/>
+                <rect x="24" y="66" width="140" height="3" rx="1.5" fill="#1a1612" opacity="0.30"/>
+                <rect x="24" y="78" width="44" height="10" rx="2" fill="#c4532b"/>
+                <rect x="14" y="104" width="62" height="32" rx="3" fill="#ebe4d4"/>
+                <rect x="89" y="104" width="62" height="32" rx="3" fill="#ebe4d4"/>
+                <rect x="164" y="104" width="62" height="32" rx="3" fill="#ebe4d4"/>
+                <rect x="-14" y="150" width="268" height="6" rx="2" fill="#1a1612" opacity="0.20"/>
+                <rect x="100" y="150" width="40" height="3" rx="1.5" fill="#1a1612" opacity="0.32"/>
+              </g>
+              <g transform="translate(290 78)">
+                <rect x="0" y="0" width="90" height="124" rx="7" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.22" stroke-width="1.6"/>
+                <rect x="6" y="8" width="78" height="10" rx="2.5" fill="#1a1612" opacity="0.08"/>
+                <rect x="10" y="24" width="70" height="40" rx="3" fill="#c4532b" opacity="0.12"/>
+                <rect x="16" y="34" width="40" height="4" rx="2" fill="#1a1612" opacity="0.55"/>
+                <rect x="16" y="42" width="50" height="2.5" rx="1" fill="#1a1612" opacity="0.30"/>
+                <rect x="16" y="48" width="34" height="2.5" rx="1" fill="#1a1612" opacity="0.30"/>
+                <rect x="16" y="56" width="28" height="6" rx="1.5" fill="#c4532b"/>
+                <rect x="10" y="72" width="34" height="40" rx="3" fill="#ebe4d4"/>
+                <rect x="48" y="72" width="34" height="40" rx="3" fill="#ebe4d4"/>
+              </g>
+              <g transform="translate(72 110)">
+                <rect x="0" y="0" width="60" height="118" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.26" stroke-width="1.6"/>
+                <rect x="22" y="4" width="16" height="2" rx="1" fill="#1a1612" opacity="0.20"/>
+                <rect x="6" y="14" width="48" height="6" rx="2" fill="#1a1612" opacity="0.08"/>
+                <rect x="6" y="24" width="48" height="34" rx="3" fill="#c4532b" opacity="0.12"/>
+                <rect x="10" y="32" width="30" height="3" rx="1.5" fill="#1a1612" opacity="0.55"/>
+                <rect x="10" y="38" width="38" height="2" rx="1" fill="#1a1612" opacity="0.30"/>
+                <rect x="10" y="44" width="22" height="2" rx="1" fill="#1a1612" opacity="0.30"/>
+                <rect x="10" y="50" width="20" height="4" rx="1" fill="#c4532b"/>
+                <rect x="6" y="62" width="48" height="22" rx="3" fill="#ebe4d4"/>
+                <rect x="6" y="88" width="48" height="22" rx="3" fill="#ebe4d4"/>
+              </g>
+            </svg>
+          </div>
           <div class="n">02</div>
           <h3>Works Perfectly on Every Device</h3>
-          <p>Tested on real iPhones, Androids, tablets, and laptops — not just in a browser window. Your customers get a smooth experience whether they're on the train, at home, or in front of a desk.</p>
+          <p>Tested on real iPhones, Androids, tablets and laptops — not just in a browser window. Smooth whether your customer's on the train, at home, or at a desk.</p>
         </div>
         <div class="cap anim" style="--i:5">
+          <!-- IMAGE: A phone showing a Google local-search result (Map Pack) with a
+                     UK trader at the top spot. Or a Google Search Console screenshot
+                     showing 'Top in your area' rankings. Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Illustration: local map with a near-me search and the number-one ranked pin highlighted">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Google local search · Map Pack ranking on phone</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#ebe4d4"/>
+              <g stroke="#1a1612" stroke-opacity="0.10" stroke-width="14" stroke-linecap="square">
+                <line x1="0" y1="78" x2="480" y2="78"/>
+                <line x1="0" y1="158" x2="480" y2="158"/>
+                <line x1="0" y1="232" x2="480" y2="232"/>
+                <line x1="80" y1="0" x2="80" y2="270"/>
+                <line x1="200" y1="0" x2="200" y2="270"/>
+                <line x1="320" y1="0" x2="320" y2="270"/>
+                <line x1="420" y1="0" x2="420" y2="270"/>
+              </g>
+              <rect x="86" y="166" width="108" height="60" rx="3" fill="#4d6b40" opacity="0.20"/>
+              <rect x="328" y="86" width="84" height="64" rx="3" fill="#4d6b40" opacity="0.14"/>
+              <g transform="translate(96 28)">
+                <rect x="0" y="0" width="288" height="36" rx="18" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.4"/>
+                <circle cx="20" cy="18" r="6" fill="none" stroke="#8c8174" stroke-width="1.5"/>
+                <line x1="24.5" y1="22.5" x2="29" y2="27" stroke="#8c8174" stroke-width="1.5" stroke-linecap="round"/>
+                <text x="38" y="23" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#4d4339">[service] near me</text>
+                <circle cx="266" cy="18" r="13" fill="#c4532b"/>
+                <circle cx="263" cy="15" r="3.5" fill="none" stroke="#f8f4ea" stroke-width="1.6"/>
+                <line x1="265.8" y1="17.8" x2="270" y2="22" stroke="#f8f4ea" stroke-width="1.6" stroke-linecap="round"/>
+              </g>
+              <g transform="translate(360 110)">
+                <path d="M0 -16 C6 -16 12 -10 12 -4 C12 2 6 10 0 22 C-6 10 -12 2 -12 -4 C-12 -10 -6 -16 0 -16 Z" fill="#c4532b" opacity="0.72"/>
+                <circle cx="0" cy="-4" r="5" fill="#f8f4ea"/>
+                <text x="0" y="-1.5" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7" font-weight="800" fill="#c4532b">2</text>
+              </g>
+              <g transform="translate(130 100)">
+                <path d="M0 -16 C6 -16 12 -10 12 -4 C12 2 6 10 0 22 C-6 10 -12 2 -12 -4 C-12 -10 -6 -16 0 -16 Z" fill="#c4532b" opacity="0.72"/>
+                <circle cx="0" cy="-4" r="5" fill="#f8f4ea"/>
+                <text x="0" y="-1.5" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7" font-weight="800" fill="#c4532b">3</text>
+              </g>
+              <g transform="translate(420 210)">
+                <path d="M0 -16 C6 -16 12 -10 12 -4 C12 2 6 10 0 22 C-6 10 -12 2 -12 -4 C-12 -10 -6 -16 0 -16 Z" fill="#c4532b" opacity="0.72"/>
+                <circle cx="0" cy="-4" r="5" fill="#f8f4ea"/>
+                <text x="0" y="-1.5" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7" font-weight="800" fill="#c4532b">4</text>
+              </g>
+              <g transform="translate(240 158)">
+                <ellipse cx="0" cy="46" rx="24" ry="4" fill="#1a1612" opacity="0.16"/>
+                <circle cx="0" cy="0" r="42" fill="#c4532b" opacity="0.16"/>
+                <path d="M0 -30 C13 -30 24 -19 24 -6 C24 6 14 19 0 40 C-14 19 -24 6 -24 -6 C-24 -19 -13 -30 0 -30 Z" fill="#c4532b"/>
+                <circle cx="0" cy="-6" r="11" fill="#f8f4ea"/>
+                <text x="0" y="-2" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="800" fill="#c4532b">1</text>
+                <g transform="translate(18 -24)">
+                  <path d="M0 -7 L2 -2 L7.2 -1.6 L3.2 1.8 L4.4 7 L0 4.2 L-4.4 7 L-3.2 1.8 L-7.2 -1.6 L-2 -2 Z" fill="#e9b14a" stroke="#1a1612" stroke-opacity="0.18" stroke-width="0.6"/>
+                </g>
+              </g>
+            </svg>
+          </div>
           <div class="n">03</div>
           <h3>Found First on Google in Your Area</h3>
-          <p>Built from the ground up to rank well in local searches. Clean code, fast page-loads, and properly structured content — the technical foundations Google rewards. So when someone in your area searches for what you do, they find you, not your competitor.</p>
+          <p>Built from the ground up to rank in local searches. Clean code, fast page-loads and structured content — the technical foundations Google rewards. So locals find you, not your competitor.</p>
         </div>
         <div class="cap anim" style="--i:6">
+          <!-- IMAGE: A calendar or kanban board showing a project timeline from
+                     'Brief' through to 'Launch' over 21 days. Clean, planning-feel
+                     workspace shot. Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Diagram: 21-day project timeline cascading from Brief through Design, Dev and QA to Launch">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Project timeline · brief to launch in 21 days</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#f8f4ea"/>
+              <rect x="16" y="16" width="448" height="238" rx="10" fill="#ebe4d4" opacity="0.55"/>
+              <g font-family="Inter, system-ui, sans-serif" font-weight="700" fill="#1a1612">
+                <text x="68"  y="58" text-anchor="middle" font-size="12">Brief</text>
+                <text x="148" y="58" text-anchor="middle" font-size="12">Design</text>
+                <text x="228" y="58" text-anchor="middle" font-size="12">Dev</text>
+                <text x="308" y="58" text-anchor="middle" font-size="12">QA</text>
+                <text x="388" y="58" text-anchor="middle" font-size="12">Launch</text>
+              </g>
+              <g font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" letter-spacing="1.5" fill="#8c8174">
+                <text x="68"  y="72" text-anchor="middle">DAYS 1–3</text>
+                <text x="148" y="72" text-anchor="middle">DAYS 4–9</text>
+                <text x="228" y="72" text-anchor="middle">DAYS 10–16</text>
+                <text x="308" y="72" text-anchor="middle">DAYS 17–20</text>
+                <text x="388" y="72" text-anchor="middle">DAY 21</text>
+              </g>
+              <g stroke="#1a1612" stroke-opacity="0.10" stroke-width="1" stroke-dasharray="2 4">
+                <line x1="108" y1="84" x2="108" y2="244"/>
+                <line x1="188" y1="84" x2="188" y2="244"/>
+                <line x1="268" y1="84" x2="268" y2="244"/>
+                <line x1="348" y1="84" x2="348" y2="244"/>
+              </g>
+              <line x1="36" y1="244" x2="444" y2="244" stroke="#1a1612" stroke-opacity="0.18" stroke-width="1"/>
+              <g>
+                <rect x="36"  y="96" width="64" height="22" rx="4" fill="#c4532b"/>
+                <text x="68" y="111" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f8f4ea">Brief</text>
+                <rect x="116" y="128" width="64" height="22" rx="4" fill="#c4532b" opacity="0.86"/>
+                <text x="148" y="143" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f8f4ea">Design</text>
+                <rect x="196" y="160" width="64" height="22" rx="4" fill="#c4532b" opacity="0.72"/>
+                <text x="228" y="175" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f8f4ea">Dev</text>
+                <rect x="276" y="192" width="64" height="22" rx="4" fill="#c4532b" opacity="0.58"/>
+                <text x="308" y="207" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f8f4ea">QA</text>
+                <rect x="356" y="224" width="64" height="14" rx="4" fill="#4d6b40"/>
+                <text x="388" y="234" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="700" fill="#f8f4ea">Launch</text>
+              </g>
+              <g stroke="#c4532b" stroke-width="1.2" stroke-opacity="0.55" fill="none" stroke-linecap="round">
+                <path d="M100 118 L116 118 L116 128"/>
+                <path d="M180 150 L196 150 L196 160"/>
+                <path d="M260 182 L276 182 L276 192"/>
+                <path d="M340 214 L356 214 L356 224"/>
+              </g>
+            </svg>
+          </div>
           <div class="n">04</div>
           <h3>Live in 10–30 Days, Quality Guaranteed</h3>
-          <p>Fixed delivery windows you can plan around — 10 to 30 days depending on scope. Every build includes a dedicated quality-control week before launch: security, performance, and device testing all signed off before your site goes live.</p>
+          <p>Fixed 10–30 day delivery windows you can plan around, with a dedicated quality-control week before launch — security, performance and device testing all signed off.</p>
         </div>
         <div class="cap anim" style="--i:7">
+          <!-- IMAGE: An uptime/performance dashboard showing 99.9% with green
+                     status indicators — or a clean monitoring tool screenshot.
+                     Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Illustration: hosting dashboard showing 99.9% uptime, page-speed score and a response-time chart">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Uptime dashboard · 99.9% green status</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#ebe4d4"/>
+              <g transform="translate(40 32)">
+                <rect x="0" y="0" width="400" height="206" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.4"/>
+                <rect x="0" y="0" width="400" height="14" rx="8" fill="#1a1612" opacity="0.06"/>
+                <rect x="0" y="8" width="400" height="6" fill="#1a1612" opacity="0.06"/>
+                <circle cx="14" cy="7" r="3" fill="#c4532b"/>
+                <circle cx="26" cy="7" r="3" fill="#e9b14a"/>
+                <circle cx="38" cy="7" r="3" fill="#4d6b40"/>
+                <rect x="120" y="3" width="160" height="8" rx="4" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.10"/>
+                <rect x="0" y="14" width="36" height="192" fill="#1a1612" opacity="0.04"/>
+                <rect x="10" y="28" width="16" height="3" rx="1.5" fill="#1a1612" opacity="0.22"/>
+                <rect x="10" y="38" width="16" height="3" rx="1.5" fill="#1a1612" opacity="0.22"/>
+                <rect x="10" y="48" width="16" height="3" rx="1.5" fill="#1a1612" opacity="0.22"/>
+                <g transform="translate(54 28)">
+                  <rect x="0" y="0" width="186" height="74" rx="6" fill="#ebe4d4"/>
+                  <circle cx="22" cy="22" r="11" fill="#4d6b40"/>
+                  <path d="M16 22 L21 27 L29 17" stroke="#f8f4ea" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <text x="42" y="30" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="800" fill="#1a1612">99.9%</text>
+                  <text x="42" y="48" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#4d4339">Uptime</text>
+                  <text x="42" y="62" font-family="JetBrains Mono, ui-monospace, monospace" font-size="8" letter-spacing="1.2" fill="#8c8174">LAST 90 DAYS</text>
+                </g>
+                <g transform="translate(252 28)">
+                  <rect x="0" y="0" width="132" height="74" rx="6" fill="#ebe4d4"/>
+                  <path d="M22 58 A40 40 0 0 1 110 58" stroke="#1a1612" stroke-opacity="0.12" stroke-width="6" fill="none" stroke-linecap="round"/>
+                  <path d="M22 58 A40 40 0 0 1 92 30" stroke="#4d6b40" stroke-width="6" fill="none" stroke-linecap="round"/>
+                  <circle cx="92" cy="30" r="3.5" fill="#4d6b40"/>
+                  <text x="66" y="52" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#1a1612">98</text>
+                  <text x="66" y="64" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="600" fill="#4d4339">Page speed</text>
+                </g>
+                <g transform="translate(54 112)">
+                  <rect x="0" y="0" width="240" height="80" rx="6" fill="#ebe4d4"/>
+                  <text x="12" y="16" font-family="Inter, system-ui, sans-serif" font-size="9" font-weight="600" fill="#4d4339">Response time · ms</text>
+                  <line x1="12" y1="62" x2="228" y2="62" stroke="#1a1612" stroke-opacity="0.10" stroke-width="1"/>
+                  <path d="M12 54 L40 46 L70 50 L100 36 L130 40 L160 26 L190 30 L220 18 L228 20 L228 62 L12 62 Z" fill="#4d6b40" opacity="0.22"/>
+                  <path d="M12 54 L40 46 L70 50 L100 36 L130 40 L160 26 L190 30 L220 18 L228 20" stroke="#4d6b40" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </g>
+                <g transform="translate(306 112)">
+                  <rect x="0" y="0" width="78" height="80" rx="6" fill="#ebe4d4"/>
+                  <path d="M39 16 L57 24 L57 40 C57 52 49 60 39 66 C29 60 21 52 21 40 L21 24 Z" fill="#c4532b"/>
+                  <path d="M31 40 L37 46 L48 34" stroke="#f8f4ea" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <text x="39" y="76" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#4d4339" letter-spacing="0.6">SECURED</text>
+                </g>
+              </g>
+            </svg>
+          </div>
           <div class="n">05</div>
           <h3>Always Online for Your Customers</h3>
-          <p>99.9% uptime hosting with proactive security monitoring. Your site stays online, fast, and secure — so you never lose a customer to a page that wouldn't load or a site that's been compromised.</p>
+          <p>99.9% uptime hosting with proactive security monitoring. Your site stays online, fast and secure — so you never lose a customer to a page that won't load.</p>
         </div>
         <div class="cap anim" style="--i:8">
+          <!-- IMAGE: A live e-commerce checkout / Stripe payment screen, ideally
+                     on mobile mid-purchase. Shows real money moving. Aspect 16:9. -->
+          <div class="img-ph cap-image" role="img" aria-label="Diagram: product to Stripe checkout to a successful payment confirmation">
+            <span class="img-ph-mark">Image</span>
+            <span class="img-ph-label">Online checkout · Stripe payment on mobile</span>
+            <svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+              <rect x="0" y="0" width="480" height="270" fill="#f8f4ea"/>
+              <rect x="16" y="16" width="448" height="238" rx="10" fill="#ebe4d4" opacity="0.55"/>
+              <g transform="translate(36 56)">
+                <rect x="0" y="0" width="120" height="158" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.5"/>
+                <rect x="10" y="10" width="100" height="78" rx="4" fill="#ebe4d4"/>
+                <g transform="translate(60 49)" fill="#c4532b" fill-opacity="0.18" stroke="#c4532b" stroke-width="1.6" stroke-linejoin="round">
+                  <path d="M-18 -10 L-8 -16 C-4 -10 4 -10 8 -16 L18 -10 L14 -2 L10 -4 L10 18 L-10 18 L-10 -4 L-14 -2 Z"/>
+                </g>
+                <rect x="10" y="98" width="66" height="5" rx="2.5" fill="#1a1612" opacity="0.55"/>
+                <rect x="10" y="108" width="46" height="3" rx="1.5" fill="#1a1612" opacity="0.30"/>
+                <text x="10" y="132" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="800" fill="#c4532b">£24.00</text>
+                <rect x="10" y="140" width="100" height="12" rx="3" fill="#c4532b"/>
+                <text x="60" y="149" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#f8f4ea">Add to basket</text>
+              </g>
+              <g stroke="#c4532b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M166 135 L196 135"/>
+                <path d="M189 130 L196 135 L189 140"/>
+              </g>
+              <g transform="translate(204 56)">
+                <rect x="0" y="0" width="120" height="158" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.5"/>
+                <rect x="0" y="0" width="120" height="22" rx="8" fill="#1a1612" opacity="0.06"/>
+                <rect x="0" y="14" width="120" height="8" fill="#1a1612" opacity="0.06"/>
+                <g transform="translate(100 6)">
+                  <rect x="0" y="4" width="11" height="9" rx="1.5" fill="#4d6b40"/>
+                  <path d="M2 4 V2 a3.5 3.5 0 0 1 7 0 V4" stroke="#4d6b40" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+                </g>
+                <text x="60" y="50" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="800" fill="#635bff" letter-spacing="-0.4">stripe</text>
+                <rect x="12" y="62" width="96" height="16" rx="3" fill="#ebe4d4"/>
+                <text x="18" y="73" font-family="JetBrains Mono, ui-monospace, monospace" font-size="7" letter-spacing="1" fill="#8c8174">•••• •••• •••• 4242</text>
+                <rect x="12" y="84" width="46" height="14" rx="3" fill="#ebe4d4"/>
+                <rect x="62" y="84" width="46" height="14" rx="3" fill="#ebe4d4"/>
+                <rect x="12" y="106" width="96" height="20" rx="4" fill="#c4532b"/>
+                <text x="60" y="120" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="700" fill="#f8f4ea">Pay £24.00</text>
+                <rect x="12" y="136" width="96" height="3" rx="1.5" fill="#1a1612" opacity="0.10"/>
+                <rect x="12" y="144" width="60" height="3" rx="1.5" fill="#1a1612" opacity="0.10"/>
+              </g>
+              <g stroke="#c4532b" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M334 135 L364 135"/>
+                <path d="M357 130 L364 135 L357 140"/>
+              </g>
+              <g transform="translate(372 56)">
+                <rect x="0" y="0" width="72" height="158" rx="8" fill="#f8f4ea" stroke="#1a1612" stroke-opacity="0.20" stroke-width="1.5"/>
+                <circle cx="36" cy="58" r="24" fill="#4d6b40" opacity="0.14"/>
+                <circle cx="36" cy="58" r="15" fill="#4d6b40"/>
+                <path d="M28 58 L34 64 L44 52" stroke="#f8f4ea" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="36" y="100" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="800" fill="#1a1612">Success</text>
+                <rect x="14" y="114" width="44" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+                <rect x="14" y="122" width="36" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+                <rect x="14" y="130" width="44" height="3" rx="1.5" fill="#1a1612" opacity="0.18"/>
+              </g>
+            </svg>
+          </div>
           <div class="n">06</div>
           <h3>Take Payments Directly On Your Site</h3>
-          <p>Sell products, take bookings, or accept deposits — payment systems built directly into your site, integrated with Stripe or your preferred processor. No clunky plugins, no platform-lock-in, no monthly platform fees eating into your margin.</p>
+          <p>Sell products, take bookings, or accept deposits — Stripe (or your preferred processor) built straight in. No clunky plugins, no platform fees eating into your margin.</p>
         </div>
       </div>
     </div>
@@ -2053,21 +2556,32 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         <p class="lede anim" style="--i:2">A clear three-stage process so you always know exactly where your project is. The 21-day timeline isn't a waiting period — it's the quality-control window that keeps your site from launching broken.</p>
       </div>
 
+      <!-- IMAGE: Editorial wide-band image. A clean desk in real working condition —
+                  notebook with a hand-drawn site brief, laptop open showing a design
+                  preview, a phone alongside testing the same site. Warm natural light.
+                  Conveys the full brief → preview → launch journey in one frame.
+                  Aspect 24:9 (desktop) collapses to 16:9 on mobile. -->
+      <div class="img-ph process-banner anim" style="--i:2" role="img" aria-label="Six capability cards laid out on a workspace — Lead Conversion Funnel, Responsive Device Suite, Local Search Rankings, Project Milestones Timeline, Server &amp; System Health, Integrated Payment Flow">
+        <span class="img-ph-mark">Image</span>
+        <span class="img-ph-label">Workspace · brief, design preview &amp; live site across devices</span>
+        <img src="images/process-21day-cycle.webp" alt="Six capability cards laid out on a wooden workspace alongside architectural sketches, pens and a leather notebook" loading="lazy" decoding="async">
+      </div>
+
       <div class="proc-list">
         <div class="step anim" style="--i:3">
           <div class="marker">01</div>
           <h3>Discovery Call</h3>
-          <p>A focused conversation about your business, your customers, and what your site actually needs to do. I turn that into a written plan with a fixed price and a launch date. Nothing gets built until you've approved it.</p>
+          <p>We talk through your business and what the site needs to do. You leave with a written plan — fixed price, launch date, agreed scope.</p>
         </div>
         <div class="step anim" style="--i:4">
           <div class="marker">02</div>
           <h3>Design Preview in 72 Hours</h3>
-          <p>I send you a working preview within three days — so you can click around your site before I write a single line of production code. Any changes happen here, before they get expensive. No surprises at the end.</p>
+          <p>A clickable preview lands in your inbox in three days. Changes happen here, before they get expensive.</p>
         </div>
         <div class="step anim" style="--i:5">
           <div class="marker">03</div>
           <h3>Build, Test, Launch</h3>
-          <p>I build your site, then spend a full week stress-testing it — every page, every device, every load time. Security checked. Performance benchmarked. Forms tested end-to-end. Your site goes live bulletproof on day 21 — not patched together and hoped for the best.</p>
+          <p>I build, then spend a full week stress-testing — every page, every device, every form. Live bulletproof on day 21.</p>
         </div>
       </div>
 
@@ -2075,7 +2589,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         <div class="qa-l">“</div>
         <div>
           <span class="qa-strong">My Quality Commitment</span>
-          <p>As a Computer Science graduate, I treat every build as a live business system — not a design project. That means a full week of testing before every launch: security, performance, and every device your customers might use. It's the level of engineering you'd expect from a software company, applied to a business website.</p>
+          <p>Every build is treated as a live business system, not a design project — a full week of security, performance and device testing before launch. Software-company engineering, applied to a business website.</p>
         </div>
       </div>
     </div>
@@ -2113,16 +2627,25 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         </div>
       </div>
 
+      <!-- IMAGE: Real-world client snapshot. Business owner at their counter / shop /
+                  studio with their finished website on screen behind them — or a
+                  before/after split of a live site. Authentic, UK SMB tone, not stock.
+                  Aspect 21:9 (desktop) collapses to 16:9 on mobile. -->
+      <div class="img-ph results-banner anim" style="--i:7" role="img" aria-label="Image placeholder: real UK business owner with their finished website in their workplace">
+        <span class="img-ph-mark">Image</span>
+        <span class="img-ph-label">Client at work · finished site live in their business</span>
+      </div>
+
       <div class="claims" style="margin-top: clamp(40px, 6vh, 64px);">
-        <div class="claim anim" style="--i:7">
+        <div class="claim anim" style="--i:8">
           <div class="kicker">Built From Scratch</div>
           <p>Every line of code is mine. No templates, no page builders, no plugin bloat. Your site is yours — fast, focused, and built around your business.</p>
         </div>
-        <div class="claim anim" style="--i:8">
+        <div class="claim anim" style="--i:9">
           <div class="kicker">You Own Everything</div>
           <p>Fixed price, one-off build. You keep full ownership of the code, the content, and the hosting account. No platform lock-in, no monthly licence fees.</p>
         </div>
-        <div class="claim anim" style="--i:9">
+        <div class="claim anim" style="--i:10">
           <div class="kicker">Direct Line To Me</div>
           <p>You're never passed to a junior or a project manager. From first email to launch day, I'm the only person building your site — and the only person you talk to.</p>
         </div>
@@ -2160,7 +2683,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
             <li class="muted"><span class="check">·</span> Multi-page structure</li>
             <li class="muted"><span class="check">·</span> Local-SEO foundations</li>
           </ul>
-          <a class="btn btn-ghost" data-goto="6">Start My Project</a>
+          <a class="btn btn-ghost" data-goto="6" data-tier="starter">Start My Project</a>
         </div>
 
         <div class="tier featured">
@@ -2181,7 +2704,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
             <li><span class="check">✓</span> Photo gallery / portfolio</li>
             <li><span class="check">✓</span> Local-SEO foundations</li>
           </ul>
-          <a class="btn btn-primary" data-goto="6" style="background: var(--accent); border-color: var(--accent); color: var(--paper);">Start My Project</a>
+          <a class="btn btn-primary" data-goto="6" data-tier="standard" style="background: var(--accent); border-color: var(--accent); color: var(--paper);">Start My Project</a>
         </div>
 
         <div class="tier">
@@ -2201,7 +2724,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
             <li><span class="check">✓</span> Take payments / bookings online</li>
             <li><span class="check">✓</span> 90 days of post-launch support</li>
           </ul>
-          <a class="btn btn-ghost" data-goto="6">Start My Project</a>
+          <a class="btn btn-ghost" data-goto="6" data-tier="premium">Start My Project</a>
         </div>
 
       </div>
@@ -2221,7 +2744,21 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         <p class="lede bold anim" style="--i:2">Free discovery call. No obligation. Most websites live within 21 days of the brief being signed off.</p>
         <p class="lede anim" style="--i:3">Send me a few lines about your business — I'll reply within 24 hours with a written scope, a fixed price, and a launch date. If we're a good fit, we book the discovery call from there.</p>
 
-        <div class="contact-meta anim" style="--i:4">
+        <!-- IMAGE: Headshot of Kevin — clean editorial portrait, plain background,
+                    looking at camera. Square crop (1:1) for the circular frame.
+                    Builds trust by putting a face to 'Direct line to me'. -->
+        <div class="founder-card anim" style="--i:4">
+          <div class="img-ph founder-img" role="img" aria-label="Image placeholder: portrait of Kevin">
+            <span class="img-ph-label">Portrait · Kevin</span>
+          </div>
+          <div class="founder-meta">
+            <span class="founder-role">Founder · Engineer</span>
+            <span class="founder-name">Kevin Mushengezi</span>
+            <span class="founder-line">Every brief lands in my inbox. Every line of code is mine.</span>
+          </div>
+        </div>
+
+        <div class="contact-meta anim" style="--i:5">
           <a href="mailto:Kevin@kevwebdesign.com">
             <span class="ic">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -2239,7 +2776,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         </div>
       </div>
 
-      <form class="contact-form anim" style="--i:5" id="contactForm" action="https://formspree.io/f/mkoyvzpe" method="POST" accept-charset="UTF-8">
+      <form class="contact-form anim" style="--i:6" id="contactForm" action="https://formspree.io/f/mkoyvzpe" method="POST" accept-charset="UTF-8">
         <div class="form-h">Send A Brief</div>
         <div class="form-sub">Tell me a little about your business. I'll reply within 24 hours.</div>
 
@@ -2269,7 +2806,7 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         </div>
         <div class="form-group">
           <label>What Do You Need? <span class="req">*</span></label>
-          <textarea name="message" placeholder="A few lines about your business, what you're selling, and roughly what you'd like the site to do. Don't worry about getting it perfect — we'll refine it on the call." required></textarea>
+          <textarea id="contactMessage" name="message" placeholder="A few lines about your business, what you're selling, and roughly what you'd like the site to do. Don't worry about getting it perfect — we'll refine it on the call." required></textarea>
         </div>
         <button type="submit" class="btn btn-primary" id="contactSubmit">
           Send My Brief
@@ -2338,22 +2875,49 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
   const curNumEl    = document.getElementById('curNum');
   const curLabelEl  = document.getElementById('curLabel');
   const bigCurEl    = document.getElementById('bigCur');
-  const scrollRoot  = document.getElementById('pages');
   const total       = pages.length;
   const isMobile    = () => window.matchMedia('(max-width: 820px)').matches;
-  // Mobile uses native body scrolling (see media query); desktop uses the
-  // nested .pages scroll container. The IntersectionObserver root and the
-  // scroll-end listener target must match whichever container is scrolling.
+  // Native body scrolling on every device — observers and scroll-end
+  // listener both target the viewport.
   const mobileInitial = isMobile();
-  const ioRoot = mobileInitial ? null : scrollRoot;
+  const ioRoot = null;
 
   pages.forEach((p, i) => p.dataset.index = i);
+
+  // Smooth-scroll helper with an iOS Safari correction. Safari's
+  // window.scrollTo({behavior:'smooth'}) sometimes stops 50–300 px
+  // short on long distances; we verify after the animation and
+  // re-scroll if it didn't reach.
+  function smoothScrollTo(targetY) {
+    const max = Math.max(0, (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight);
+    const clamped = Math.max(0, Math.min(targetY, max));
+    window.scrollTo({ top: clamped, behavior: 'smooth' });
+    // Verify after the animation should have settled
+    setTimeout(() => {
+      if (Math.abs(window.pageYOffset - clamped) > 12) {
+        window.scrollTo({ top: clamped, behavior: 'smooth' });
+      }
+    }, 700);
+  }
 
   function goTo(index) {
     const target = pages[index];
     if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const targetY = target.getBoundingClientRect().top + window.pageYOffset;
+    smoothScrollTo(targetY);
   }
+  // Pricing-tier prefills: when a "Start My Project" CTA is clicked,
+  // prefill the contact textarea with a contextual opener so the visitor
+  // can extend it instead of writing from scratch. Only overwrites the
+  // field if it's empty or still contains a pristine prefill (so we
+  // don't stomp on real typing).
+  const tierPrefills = {
+    starter:  "Hi Kevin — I'd like to discuss the Starter Site package (from £450). A bit about my business: ",
+    standard: "Hi Kevin — I'd like to discuss the Standard Site package (from £950). A bit about my business: ",
+    premium:  "Hi Kevin — I'd like to discuss the Premium Site package (from £1,850). A bit about my business: "
+  };
+  const prefillValues = Object.values(tierPrefills);
+
   document.querySelectorAll('[data-goto]').forEach((el) => {
     el.addEventListener('click', (e) => {
       e.preventDefault();
@@ -2362,6 +2926,23 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
       // scroll is silently no-op'd because body has overflow:hidden.
       // The drawer-specific handler below handles those; skip here.
       if (el.closest('.drawer')) return;
+
+      const tier = el.dataset.tier;
+      if (tier && tierPrefills[tier]) {
+        const msg = document.getElementById('contactMessage');
+        if (msg && (!msg.value.trim() || prefillValues.includes(msg.value))) {
+          msg.value = tierPrefills[tier];
+        }
+        // Tier CTAs should land on the form itself, not the section
+        // intro — the visitor is ready to brief, not read more copy.
+        const form = document.getElementById('contactForm');
+        if (form) {
+          const formY = form.getBoundingClientRect().top + window.pageYOffset - 24;
+          smoothScrollTo(formY);
+          return;
+        }
+      }
+
       goTo(parseInt(el.dataset.goto, 10));
     });
   });
@@ -2467,20 +3048,20 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
     });
     pages.forEach((p) => pageObs.observe(p));
 
-    // Scroll-end fallback — desktop only, same reason.
+    // Scroll-end fallback — desktop only, same reason. Body scrolls
+    // natively now, so we listen on window and measure each page's
+    // distance from the viewport top.
     let scrollEndTimer;
     const onScrollSettle = () => {
-      if (!scrollRoot) return;
-      const rootRect = scrollRoot.getBoundingClientRect();
       let closest = null, bestDist = Infinity;
       pages.forEach((p) => {
         const r = p.getBoundingClientRect();
-        const dist = Math.abs(r.top - rootRect.top);
+        const dist = Math.abs(r.top);
         if (dist < bestDist) { closest = p; bestDist = dist; }
       });
       if (closest) activate(closest);
     };
-    scrollRoot.addEventListener('scroll', () => {
+    window.addEventListener('scroll', () => {
       clearTimeout(scrollEndTimer);
       scrollEndTimer = setTimeout(onScrollSettle, 140);
     }, { passive: true });
@@ -2626,7 +3207,9 @@ html.js-ready .proc-list.is-visible::after { width: 84%; }
         closeDrawer();
         setTimeout(() => {
           const target = pages[idx];
-          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (!target) return;
+          const targetY = target.getBoundingClientRect().top + window.pageYOffset;
+          smoothScrollTo(targetY);
         }, 80);
       });
     });

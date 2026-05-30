@@ -649,8 +649,14 @@ html.js-ready .anim.is-visible {
     // Basic validation
     const name  = form.querySelector('[name=name]').value.trim();
     const email = form.querySelector('[name=email]').value.trim();
+    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!name || !email) {
       formMsg.textContent = 'Please fill in your name and email.';
+      formMsg.className   = 'form-msg error';
+      return;
+    }
+    if (!validEmail) {
+      formMsg.textContent = 'Please enter a valid email address.';
       formMsg.className   = 'form-msg error';
       return;
     }

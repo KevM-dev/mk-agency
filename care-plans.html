@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.classList.add('js-ready');</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Care Plans — Kevin Labs</title>
+<link rel="icon" type="image/svg+xml" href="images/favicon.svg?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:      #f1ece1;
+  --paper:   #f8f4ea;
+  --surface: #ebe4d4;
+  --ink:     #1a1612;
+  --ink-2:   #4d4339;
+  --ink-3:   #8c8174;
+  --rule:    rgba(26, 22, 18, 0.12);
+  --rule-2:  rgba(26, 22, 18, 0.22);
+  --accent:    #c4532b;
+  --accent-2:  #a8421f;
+  --accent-soft: rgba(196, 83, 43, 0.10);
+  --serif: 'Instrument Serif', 'Times New Roman', serif;
+  --sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --mono:  'JetBrains Mono', ui-monospace, monospace;
+  --ease:  cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: clamp(24px, 5vw, 72px);
+  --col-w:  clamp(320px, 95vw, 1320px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body { overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+::selection { background: var(--accent); color: var(--paper); }
+
+/* Grain */
+.grain {
+  position: fixed; inset: 0; z-index: 100;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Ambient blobs */
+.ambient-bg {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none; overflow: hidden;
+}
+.ambient-bg .blob {
+  position: absolute; border-radius: 50%; filter: blur(60px);
+}
+.ambient-bg .blob-1 {
+  width: 44vmax; height: 44vmax;
+  background: radial-gradient(circle at 35% 35%, #e88560 0%, #c4532b 40%, transparent 70%);
+  top: -14vmax; right: -12vmax; opacity: 0.22;
+}
+.ambient-bg .blob-2 {
+  width: 40vmax; height: 40vmax;
+  background: radial-gradient(circle at 40% 40%, #f6c8a3, transparent 70%);
+  bottom: -16vmax; left: -12vmax; opacity: 0.32;
+}
+
+/* Header */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: clamp(18px, 2.6vh, 28px) var(--gutter);
+  background: rgba(241, 236, 225, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid rgba(26, 22, 18, 0.06);
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: var(--sans); font-size: 15px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+}
+.brand .mark {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--ink); position: relative; display: inline-block;
+}
+.brand .mark::after {
+  content: ""; position: absolute; inset: 12px;
+  background: var(--accent); border-radius: 50%;
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-2);
+  transition: color 0.25s;
+}
+.back-link:hover { color: var(--accent); }
+.back-link .arr { transition: transform 0.3s var(--ease); }
+.back-link:hover .arr { transform: translateX(-3px); }
+
+/* Layout */
+.wrap {
+  position: relative; z-index: 1;
+  padding: clamp(120px, 15vh, 160px) var(--gutter) clamp(72px, 9vh, 110px);
+}
+.container {
+  width: 100%; max-width: var(--col-w); margin: 0 auto;
+  position: relative; z-index: 2;
+}
+
+/* Typography */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 28px;
+}
+.eyebrow .rule {
+  display: inline-block; width: 28px; height: 1px; background: var(--accent);
+}
+.display {
+  font-family: var(--serif); font-weight: 400;
+  line-height: 0.98; letter-spacing: -0.02em; color: var(--ink);
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+}
+.display em { font-style: italic; font-weight: 400; }
+h2.display { font-size: clamp(2.2rem, 5.6vw, 4.6rem); }
+.lede {
+  font-size: clamp(1rem, 1.05vw + 0.7rem, 1.18rem);
+  line-height: 1.55; color: var(--ink-2); max-width: 56ch; font-weight: 400;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-weight: 600; font-size: 0.95rem;
+  padding: 14px 22px; border-radius: 4px; border: 1px solid var(--ink);
+  transition: transform 0.4s var(--ease), background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover {
+  background: var(--accent); border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(196, 83, 43, 0.25);
+}
+.btn-ghost { background: transparent; color: var(--ink); }
+.btn-ghost:hover {
+  background: var(--ink); color: var(--paper);
+  transform: translateY(-2px);
+}
+.btn .arrow { transition: transform 0.35s var(--ease); display: inline-flex; }
+.btn:hover .arrow { transform: translate(4px, -1px); }
+
+/* Hero area */
+.page-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto clamp(48px, 7vh, 72px);
+}
+.page-head h2 { margin: 12px 0 24px; }
+.page-head .lede { margin: 0 auto; }
+
+/* Pricing grid */
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--rule-2);
+  background: var(--paper);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.tier {
+  padding: clamp(28px, 3.5vh, 44px) clamp(22px, 2vw, 30px) clamp(28px, 3.5vh, 36px);
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--rule-2);
+  position: relative;
+  transition: background 0.4s, opacity 0.45s var(--ease), transform 0.45s var(--ease), box-shadow 0.4s, outline-color 0.3s;
+}
+.tier:last-child { border-right: 0; }
+.tier:hover { background: rgba(255,255,255,0.5); }
+.tier.featured { background: var(--ink); color: var(--paper); }
+.tier.featured .kind,
+.tier.featured h3,
+.tier.featured .price,
+.tier.featured .tier-body,
+.tier.featured .feat li,
+.tier.featured .feat li.muted { color: var(--paper); }
+.tier.featured .feat li.muted { opacity: 0.45; }
+.tier.featured .check { color: #d4936f; }
+.tier.featured:hover { background: #221c17; }
+.tier .pop {
+  position: absolute; top: clamp(14px, 2vh, 22px); right: clamp(20px, 2vw, 28px);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent);
+}
+.tier .kind {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.tier h3 {
+  font-family: var(--serif); font-weight: 400;
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(1.4rem, 2vw, 1.85rem);
+  margin: 10px 0 22px; letter-spacing: -0.015em; line-height: 1.05;
+}
+.tier .price {
+  font-family: var(--serif); font-weight: 400;
+  font-variation-settings: "opsz" 144, "SOFT" 20;
+  color: var(--ink); line-height: 1; margin-bottom: 18px;
+}
+.tier .price .per {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3);
+  display: block; margin-top: 6px;
+}
+.tier .price .num { font-size: clamp(2.4rem, 4vw, 3.4rem); letter-spacing: -0.02em; }
+.tier .price .cur { font-size: 0.55em; vertical-align: top; color: var(--accent); }
+.tier .tier-body {
+  font-size: 0.88rem; line-height: 1.55;
+  color: var(--ink-2); margin-bottom: 22px; min-height: 3em;
+}
+.tier .feat { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; flex: 1; }
+.tier .feat li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.88rem; line-height: 1.4; color: var(--ink);
+}
+.tier .feat li.muted {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  text-decoration-color: rgba(140, 129, 116, 0.4);
+}
+.tier .feat .check {
+  color: var(--accent); font-family: var(--serif); font-weight: 400;
+  flex-shrink: 0; display: inline-block; width: 14px; font-size: 14px; margin-top: 1px;
+}
+.tier .btn { width: 100%; justify-content: center; }
+
+/* Plan selection states */
+.price-grid.has-selection .tier:not(.is-selected) {
+  opacity: 0.3;
+  transform: scale(0.98);
+  pointer-events: none;
+}
+.price-grid.has-selection .tier.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  box-shadow: 0 12px 40px rgba(196, 83, 43, 0.18);
+  z-index: 1;
+}
+.price-grid.has-selection .tier.featured.is-selected {
+  background: #221c17;
+}
+
+/* Enquiry panel */
+.enquiry-wrap {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.6s var(--ease);
+}
+.enquiry-wrap.open {
+  max-height: 680px;
+}
+.enquiry-panel {
+  margin-top: clamp(28px, 4vh, 44px);
+  background: var(--paper);
+  border: 1px solid var(--rule-2);
+  border-radius: 4px;
+  padding: clamp(28px, 4vh, 48px) clamp(24px, 3vw, 44px);
+}
+.enquiry-header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: clamp(24px, 3vh, 36px);
+  padding-bottom: clamp(20px, 2.5vh, 28px);
+  border-bottom: 1px solid var(--rule);
+}
+.enquiry-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px;
+}
+.enquiry-plan {
+  display: flex; align-items: baseline; gap: 12px;
+}
+.enquiry-plan .plan-name {
+  font-family: var(--serif); font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  letter-spacing: -0.01em; line-height: 1;
+}
+.enquiry-plan .plan-price {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent);
+}
+.change-plan {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px solid var(--rule-2); padding-bottom: 2px;
+  cursor: pointer; background: none; border-top: 0; border-left: 0; border-right: 0;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.change-plan:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Enquiry form */
+.enquiry-form { display: grid; gap: 16px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+.field input,
+.field textarea {
+  font: inherit; font-size: 0.95rem;
+  background: var(--bg); color: var(--ink);
+  border: 1px solid var(--rule-2); border-radius: 4px;
+  padding: 12px 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none; resize: none;
+  width: 100%;
+}
+.field input:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(196, 83, 43, 0.1);
+}
+.field textarea { min-height: 110px; }
+
+.form-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-top: 4px;
+}
+.form-msg {
+  font-size: 0.88rem; line-height: 1.4;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+}
+.form-msg.success { color: #3a7a45; }
+.form-msg.error   { color: var(--accent); }
+
+/* Footnote */
+.price-footnote {
+  text-align: center;
+  margin-top: clamp(28px, 4vh, 44px);
+  font-size: 0.92rem;
+  color: var(--ink-2);
+}
+.price-footnote .sep { margin: 0 12px; color: var(--ink-3); }
+.price-footnote a {
+  color: var(--ink); border-bottom: 1px solid var(--rule-2);
+  padding-bottom: 2px; transition: color 0.2s, border-color 0.2s;
+}
+.price-footnote a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Footer */
+.site-footer {
+  padding: clamp(28px, 4vh, 44px) var(--gutter);
+  border-top: 1px solid var(--rule-2);
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 2;
+  flex-wrap: wrap; gap: 12px;
+}
+.foot-note {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.15em; color: var(--ink-3);
+  text-transform: uppercase;
+}
+.foot-back {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink-2);
+  transition: color 0.2s;
+}
+.foot-back:hover { color: var(--accent); }
+
+/* Animations */
+.anim {
+  opacity: 1; transform: none;
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
+}
+html.js-ready .anim {
+  opacity: 0; transform: translate3d(0, 16px, 0);
+  transition-delay: calc(var(--i, 0) * 40ms);
+}
+html.js-ready .anim.is-visible {
+  opacity: 1; transform: translate3d(0, 0, 0);
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .price-grid { grid-template-columns: 1fr; }
+  .tier { border-right: 0; border-bottom: 1px solid var(--rule-2); }
+  .tier:last-child { border-bottom: 0; }
+  .price-grid.has-selection .tier:not(.is-selected) { display: none; }
+  .price-grid.has-selection .tier.is-selected { border-bottom: 0; }
+  .enquiry-wrap.open { max-height: 860px; }
+}
+@media (max-width: 680px) {
+  .field-row { grid-template-columns: 1fr; }
+  .enquiry-wrap.open { max-height: 1000px; }
+}
+@media (max-width: 600px) {
+  .page-head { text-align: left; }
+  .page-head .lede { margin: 0; }
+  .price-footnote { text-align: left; }
+  .price-footnote .sep { display: block; height: 4px; visibility: hidden; }
+  .site-footer { flex-direction: column; align-items: flex-start; }
+  .form-foot { flex-direction: column; align-items: flex-start; }
+  .form-foot .btn { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="ambient-bg" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+</div>
+
+<header class="site-header">
+  <a class="brand" href="https://kevwebdesign.com">
+    <span class="mark"></span>
+    Kevin Labs
+  </a>
+  <a class="back-link" href="https://kevwebdesign.com">
+    <span class="arr">←</span> Back to main site
+  </a>
+</header>
+
+<main class="wrap">
+  <div class="container">
+
+    <div class="page-head">
+      <div class="eyebrow anim" style="--i:0"><span class="rule"></span> Care Plans</div>
+      <h2 class="display anim" style="--i:1">After launch, <em>we've got you.</em></h2>
+      <p class="lede anim" style="--i:2">Your site needs to stay fast, secure, and up to date. Choose a monthly plan and leave the technical upkeep to me — so you can focus on running your business.</p>
+    </div>
+
+    <div class="price-grid anim" id="priceGrid" style="--i:3">
+
+      <div class="tier">
+        <span class="kind">I · Monthly retainer</span>
+        <h3>Basic Care</h3>
+        <div class="price">
+          <span class="num"><span class="cur">£</span>45</span>
+          <span class="per">Per month</span>
+        </div>
+        <p class="tier-body">The essentials — your site stays online, backed up, and secure without you having to think about it.</p>
+        <ul class="feat">
+          <li><span class="check">✓</span> Monthly security &amp; software updates</li>
+          <li><span class="check">✓</span> Uptime monitoring</li>
+          <li><span class="check">✓</span> Monthly backup</li>
+          <li><span class="check">✓</span> 1 content edit per month</li>
+          <li><span class="check">✓</span> Email support (48hr response)</li>
+          <li class="muted"><span class="check">·</span> Weekly backups</li>
+          <li class="muted"><span class="check">·</span> Performance monitoring</li>
+          <li class="muted"><span class="check">·</span> Monthly health report</li>
+        </ul>
+        <button class="btn btn-ghost tier-btn" data-plan="Basic Care" data-price="£45/month">
+          Get This Plan
+          <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </button>
+      </div>
+
+      <div class="tier featured">
+        <span class="pop">Most Popular</span>
+        <span class="kind">II · Monthly retainer</span>
+        <h3>Growth</h3>
+        <div class="price">
+          <span class="num"><span class="cur">£</span>85</span>
+          <span class="per">Per month</span>
+        </div>
+        <p class="tier-body">Active maintenance with more frequent updates and priority support — right for a business actively growing its online presence.</p>
+        <ul class="feat">
+          <li><span class="check">✓</span> Everything in Basic Care</li>
+          <li><span class="check">✓</span> Weekly backups</li>
+          <li><span class="check">✓</span> Performance monitoring</li>
+          <li><span class="check">✓</span> 3 content edits per month</li>
+          <li><span class="check">✓</span> Priority support (24hr response)</li>
+          <li><span class="check">✓</span> Monthly health report</li>
+          <li class="muted"><span class="check">·</span> Unlimited content edits</li>
+          <li class="muted"><span class="check">·</span> Monthly strategy call</li>
+        </ul>
+        <button class="btn tier-btn" data-plan="Growth" data-price="£85/month" style="background: var(--accent); border-color: var(--accent); color: var(--paper); width: 100%; justify-content: center;">
+          Get This Plan
+          <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </button>
+      </div>
+
+      <div class="tier">
+        <span class="kind">III · Monthly retainer</span>
+        <h3>Full Service</h3>
+        <div class="price">
+          <span class="num"><span class="cur">£</span>150</span>
+          <span class="per">Per month</span>
+        </div>
+        <p class="tier-body">Hands-off ownership — unlimited edits, daily backups, same-day response, and a monthly call to keep the site aligned with your business.</p>
+        <ul class="feat">
+          <li><span class="check">✓</span> Everything in Growth</li>
+          <li><span class="check">✓</span> Daily backups</li>
+          <li><span class="check">✓</span> Unlimited content edits</li>
+          <li><span class="check">✓</span> Same-day response</li>
+          <li><span class="check">✓</span> Monthly strategy call</li>
+          <li><span class="check">✓</span> SEO health checks</li>
+          <li><span class="check">✓</span> Emergency support</li>
+        </ul>
+        <button class="btn btn-ghost tier-btn" data-plan="Full Service" data-price="£150/month">
+          Get This Plan
+          <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Enquiry panel — revealed on plan selection -->
+    <div class="enquiry-wrap" id="enquiryWrap" aria-live="polite">
+      <div class="enquiry-panel">
+        <div class="enquiry-header">
+          <div>
+            <p class="enquiry-label">Enquiring about</p>
+            <div class="enquiry-plan">
+              <span class="plan-name" id="planName"></span>
+              <span class="plan-price" id="planPrice"></span>
+            </div>
+          </div>
+          <button class="change-plan" id="changeBtn" type="button">← Change plan</button>
+        </div>
+
+        <form class="enquiry-form" id="enquiryForm" action="https://formspree.io/f/mkoyvzpe" method="POST" novalidate>
+          <input type="hidden" name="plan" id="planField">
+          <input type="hidden" name="_subject" id="subjectField">
+
+          <div class="field-row">
+            <div class="field">
+              <label for="fname">Your name</label>
+              <input type="text" id="fname" name="name" placeholder="Jane Smith" required autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="femail">Email address</label>
+              <input type="email" id="femail" name="email" placeholder="jane@example.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="fmessage">Anything you'd like me to know? <span style="color:var(--ink-3)">(optional)</span></label>
+            <textarea id="fmessage" name="message" placeholder="E.g. my site launches in two weeks, or I'm not sure which plan fits…"></textarea>
+          </div>
+
+          <div class="form-foot">
+            <span class="form-msg" id="formMsg" role="status"></span>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              Send Enquiry
+              <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <p class="price-footnote anim" style="--i:4">
+      Domain &amp; hosting from £50/year<span class="sep">·</span>Not sure which plan fits? <a href="mailto:kevin@kevwebdesign.com">Email Kevin</a> and we'll work it out together.
+    </p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <span class="foot-note">Kevin Labs © 2026 · kevwebdesign.com</span>
+  <a class="foot-back" href="https://kevwebdesign.com">← Back to Kevin Labs</a>
+</footer>
+
+<script>
+(function () {
+  // Scroll-reveal
+  const anims = document.querySelectorAll('.anim');
+  const reveal = el => el.classList.add('is-visible');
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { reveal(e.target); obs.unobserve(e.target); } });
+    }, { threshold: 0.05, rootMargin: '0px 0px -8% 0px' });
+    anims.forEach(el => obs.observe(el));
+  } else {
+    anims.forEach(reveal);
+  }
+
+  // Plan selection
+  const grid       = document.getElementById('priceGrid');
+  const wrap       = document.getElementById('enquiryWrap');
+  const planName   = document.getElementById('planName');
+  const planPrice  = document.getElementById('planPrice');
+  const planField  = document.getElementById('planField');
+  const subjField  = document.getElementById('subjectField');
+  const changeBtn  = document.getElementById('changeBtn');
+  const form       = document.getElementById('enquiryForm');
+  const formMsg    = document.getElementById('formMsg');
+  const submitBtn  = document.getElementById('submitBtn');
+
+  function selectPlan(btn) {
+    const tier = btn.closest('.tier');
+
+    document.querySelectorAll('.tier').forEach(t => t.classList.remove('is-selected'));
+    tier.classList.add('is-selected');
+    grid.classList.add('has-selection');
+
+    planName.textContent  = btn.dataset.plan;
+    planPrice.textContent = btn.dataset.price;
+    planField.value       = btn.dataset.plan;
+    subjField.value       = 'Care Plan Enquiry — ' + btn.dataset.plan;
+
+    formMsg.textContent  = '';
+    formMsg.className    = 'form-msg';
+
+    wrap.classList.add('open');
+
+    // Scroll form into view after transition starts
+    setTimeout(() => {
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.tier').forEach(t => t.classList.remove('is-selected'));
+    grid.classList.remove('has-selection');
+    wrap.classList.remove('open');
+    formMsg.textContent = '';
+    formMsg.className   = 'form-msg';
+    form.reset();
+  }
+
+  document.querySelectorAll('.tier-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectPlan(btn));
+  });
+
+  changeBtn.addEventListener('click', clearSelection);
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Basic validation
+    const name  = form.querySelector('[name=name]').value.trim();
+    const email = form.querySelector('[name=email]').value.trim();
+    if (!name || !email) {
+      formMsg.textContent = 'Please fill in your name and email.';
+      formMsg.className   = 'form-msg error';
+      return;
+    }
+
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch(form.action, {
+        method:  'POST',
+        body:    new FormData(form),
+        headers: { Accept: 'application/json' }
+      });
+
+      if (res.ok) {
+        formMsg.textContent = "Sent — I’ll be in touch within 24 hours.";
+        formMsg.className   = 'form-msg success';
+        form.reset();
+        planField.value = planName.textContent; // keep hidden field after reset
+      } else {
+        throw new Error();
+      }
+    } catch {
+      formMsg.textContent = 'Something went wrong — email kevin@kevwebdesign.com directly.';
+      formMsg.className   = 'form-msg error';
+    } finally {
+      submitBtn.disabled    = false;
+      submitBtn.innerHTML   = 'Send Enquiry <span class="arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>';
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -13,7 +13,7 @@
     <link
       rel="preload"
       as="image"
-      href="images/rk-tile-stone.webp"
+      href="images/giottos-african-store.webp"
       fetchpriority="high"
     />
     <link
@@ -47,6 +47,11 @@
 
         --gutter: clamp(24px, 5vw, 72px);
         --col-w: clamp(320px, 95vw, 1320px);
+
+        /* Mirrors .chrome-top's real height: 38px mark + vertical padding
+     + border. Sections pad against this so content never starts
+     underneath the fixed header. */
+        --hdr-h: calc(38px + 2 * clamp(20px, 3vh, 32px) + 1px);
       }
 
       * {
@@ -226,7 +231,8 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding: clamp(72px, 9vh, 110px) var(--gutter) clamp(56px, 7vh, 90px);
+        padding: calc(var(--hdr-h) + clamp(16px, 3vh, 36px)) var(--gutter)
+          clamp(56px, 7vh, 90px);
         position: relative;
         overflow: hidden;
       }
@@ -2200,7 +2206,7 @@
           min-height: 100vh;
           padding: 84px var(--gutter) 48px;
           justify-content: flex-start;
-          padding-top: 96px;
+          padding-top: calc(var(--hdr-h) + 12px);
         }
         .page > .container {
           margin-top: auto;
@@ -3078,21 +3084,6 @@
             <a class="idx-item" data-goto="1">
               <span class="n">003</span>
               <div class="t">
-                <div class="name">RK Tile &amp; Stone</div>
-                <div class="kind">Trades · Client Build</div>
-              </div>
-              <div class="img">
-                <img
-                  src="images/rk-tile-stone.webp"
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </a>
-            <a class="idx-item" data-goto="1">
-              <span class="n">004</span>
-              <div class="t">
                 <div class="name">HouzME</div>
                 <div class="kind">PropTech · Showcase Build</div>
               </div>
@@ -3227,55 +3218,11 @@
             <a
               class="proj anim"
               style="--i: 5"
-              href="https://kevm-dev.github.io/rk-tile-stone/"
-              target="_blank"
-              rel="noopener"
-            >
-              <span class="num">003 · Client Build · 2025</span>
-              <div class="frame">
-                <img
-                  src="images/rk-tile-stone.webp"
-                  alt="RK Tile &amp; Stone"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <div class="tags">
-                <span class="tag">Trades</span
-                ><span class="tag">Construction</span>
-              </div>
-              <h3>RK Tile &amp; Stone</h3>
-              <p>
-                A portfolio-led website for an established tile and stone
-                contractor — built so prospective clients can see the quality of
-                work before they pick up the phone. Loads instantly on mobile,
-                works on every device, and makes it easy to enquire.
-              </p>
-              <span class="more"
-                >View Live Site
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" /></svg
-              ></span>
-            </a>
-
-            <a
-              class="proj anim"
-              style="--i: 6"
               href="https://kevm-dev.github.io/houzme-demo/"
               target="_blank"
               rel="noopener"
             >
-              <span class="num">004 · Showcase Build · 2024</span>
+              <span class="num">003 · Showcase Build · 2024</span>
               <div class="frame">
                 <img
                   src="images/houzme.webp"
